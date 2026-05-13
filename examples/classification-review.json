@@ -1,0 +1,17 @@
+{
+  "message_id": "18f3d7c21ab4",
+  "classification": "INCLUDE",
+  "one_sentence_summary": "River City Library is hosting a free family summer reading kickoff at the Main Branch on May 16.",
+  "reason": "This is a local, positive, family-friendly event with clear date, place, and organizer details in the source text.",
+  "missing_detail_for_human_review": "",
+  "extracted_facts": {
+    "event_name": "Summer Reading Kickoff",
+    "organization": "River City Library",
+    "date": "Saturday, May 16 from 10:00 AM to 1:00 PM",
+    "location": "Main Branch, 42 Oak Street",
+    "call_to_action": "Learn more at rivercitylibrary.org/summer"
+  },
+  "source_from": "events@rivercitylibrary.org",
+  "source_subject": "Free Summer Reading Kickoff This Saturday",
+  "source_snippet": "Join us for a free family kickoff with books, crafts, and signups for summer reading."
+}

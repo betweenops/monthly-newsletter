@@ -6,20 +6,37 @@ Build a simple monthly workflow that:
 
 - runs once per month in Zapier
 - pulls candidate local updates from Gmail
-- uses an LLM to classify items as `INCLUDE`, `MAYBE`, or `EXCLUDE`
+- optionally uses an AI step to classify items as `INCLUDE`, `MAYBE`, or `EXCLUDE`
 - generates a newsletter draft from approved items only
 - creates a draft in Mailchimp or HubSpot
+- uses a CRM-defined audience or email-platform list for recipients
 - emails the owner a review summary
 - never sends automatically
 
 This document is intentionally scoped to a Zapier-first MVP. It does not require AWS, a custom backend, or a database.
 
+## Recommended MVP Shape
+
+Default build:
+
+- `Gmail` provides the source material
+- `CRM` or the email platform provides the recipient audience
+- `Zapier` assembles a monthly draft from a fixed newsletter template
+- `Mailchimp` or `HubSpot` stores the draft
+- human review happens before send
+
+Optional enhancement:
+
+- add an AI step inside Zapier only if you need help classifying source emails or turning messy source material into cleaner newsletter copy
+
 ## Core Decisions
 
 - Use `Zapier` as the scheduler, glue, and approval-notification layer.
 - Use `Gmail` as the source of candidate updates.
+- Use the `CRM` or downstream email platform as the source of recipients.
 - Use a `trusted sender + Gmail label` strategy for quality control.
-- Use `gpt-5.4` via OpenAI or an Ask Sage-compatible API for classification and draft generation.
+- Keep the first version workable without direct API calls.
+- Use an AI step in Zapier only if template-only assembly is too brittle or too manual.
 - Use `Mailchimp` first for the MVP because draft campaign creation is straightforward.
 - Keep `HubSpot` as an equivalent downstream swap if preferred.
 - Require human review before send.
@@ -30,10 +47,10 @@ This document is intentionally scoped to a Zapier-first MVP. It does not require
 2. `Gmail` searches for candidate messages from the last `30-45` days.
 3. `Looping by Zapier` processes each candidate email.
 4. `Formatter by Zapier` extracts a compact structured candidate record.
-5. `LLM Step 1` classifies and summarizes each candidate.
-6. `Storage by Zapier` or `Digest by Zapier` collects the reviewed results.
-7. `LLM Step 2` writes the final draft using approved items only.
-8. `Mailchimp` or `HubSpot` creates a draft newsletter.
+5. Optional `AI by Zapier`, `OpenAI`, or similar step classifies or cleans up candidate content.
+6. `Digest by Zapier` or `Formatter by Zapier` assembles the approved content bundle.
+7. `Formatter by Zapier` or an optional AI step fills the final newsletter template.
+8. `Mailchimp` or `HubSpot` creates a draft newsletter for the CRM-defined audience.
 9. `Gmail` emails the owner a review package and approval checklist.
 10. The owner manually reviews and sends from the email platform.
 
@@ -54,7 +71,7 @@ Apply that label to:
 - trusted local business announcements
 - family-friendly event roundups
 
-This matters more than prompt tuning. The highest quality MVP is produced by curating the inbox before the LLM sees it.
+This matters more than prompt tuning. The highest quality MVP is produced by curating the inbox before any AI step sees it.
 
 ### CRM Fields
 
@@ -92,6 +109,8 @@ Use this object per email before classification:
 ```
 
 ### Reviewed Item Shape
+
+Use this only if you add an AI classification step. If you skip AI, you can work directly from selected Gmail items and a simpler digest.
 
 Use this object after LLM review:
 
@@ -158,7 +177,7 @@ newer_than:45d -("election" OR "shooting" OR "arrest" OR "lawsuit" OR "protest" 
 
 ### Volume Guidance
 
-Start with `20-40` emails per monthly run. More than that increases false positives, token costs, and review friction.
+Start with `20-40` emails per monthly run. More than that increases review friction and, if you add AI, token cost.
 
 ## Workflow Summary
 
@@ -167,15 +186,15 @@ The monthly run should stay simple:
 1. Trigger the workflow on a fixed monthly schedule.
 2. Search Gmail for labeled and trusted-source messages from the last `30-45` days.
 3. Clean each message into a compact candidate record.
-4. Classify each candidate with the LLM as `INCLUDE`, `MAYBE`, or `EXCLUDE`.
-5. Aggregate the reviewed results for that month.
-6. Generate a newsletter draft from approved items only.
-7. Create a draft in Mailchimp or HubSpot.
+4. Select or classify the best candidates.
+5. Aggregate the approved results for that month.
+6. Fill the newsletter template.
+7. Create a draft in Mailchimp or HubSpot for the intended audience.
 8. Email the owner a review summary and checklist.
 9. Require manual approval before send.
 
 For the literal Zap steps and field mappings, use [ZAPIER_BUILD_SHEET.md](./ZAPIER_BUILD_SHEET.md).  
-For the exact OpenAI and Ask Sage-compatible request payloads, use [WEBHOOK_TEMPLATES.md](./WEBHOOK_TEMPLATES.md).
+Use [WEBHOOK_TEMPLATES.md](./WEBHOOK_TEMPLATES.md) only if you choose an advanced webhook-based AI step.
 
 ## Mailchimp vs HubSpot
 
@@ -208,16 +227,19 @@ Use CRM to:
 - segment by city or region if needed
 - store newsletter participation status
 
+For the MVP, the CRM should define who receives the newsletter, not provide the newsletter content.
+
 Do not use CRM as the source of content in MVP. Gmail should remain the source of candidate updates.
 
-## Prompt Ownership
+## Template Ownership
 
-Keep prompt definitions in one place:
+Keep reusable content assets in one place:
 
-- classification and draft-generation request bodies live in [WEBHOOK_TEMPLATES.md](./WEBHOOK_TEMPLATES.md)
+- newsletter HTML wrapper lives in `templates/`
+- sample payloads and dry-run examples live in `examples/`
 - Zap-level field mappings and parser steps live in [ZAPIER_BUILD_SHEET.md](./ZAPIER_BUILD_SHEET.md)
 
-This document should describe the rules and decisions behind those prompts, not duplicate them.
+If you later choose a webhook-based AI path, prompt definitions live in [WEBHOOK_TEMPLATES.md](./WEBHOOK_TEMPLATES.md).
 
 ## Guardrails
 
@@ -250,11 +272,10 @@ Always exclude:
 - speculative claims
 - negative or fear-based content
 
-### LLM Guardrails
+### AI Guardrails
 
-- Keep temperature low.
-- Require strict JSON for the classifier.
-- Process one email per classification call.
+- Keep any AI step optional and narrow in scope.
+- Process one email at a time if you use AI classification.
 - Use source-grounding language in every prompt.
 - If any key fact is uncertain, mark `MAYBE` or omit.
 - Never allow the model to invent dates, venues, or organizations.

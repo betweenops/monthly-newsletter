@@ -2,9 +2,13 @@
 
 ## Scope
 
-These templates are for calling your LLM from Zapier using `Webhooks by Zapier`.
+These templates are optional.
 
-Use this document if:
+Use them only if Zapier's built-in app steps are not enough and you decide to call an LLM through `Webhooks by Zapier`.
+
+Do not start here for the MVP. Start with [ZAPIER_BUILD_SHEET.md](./ZAPIER_BUILD_SHEET.md) and a Zapier-native build first.
+
+Use this document only if:
 
 - you want direct API control rather than the Zapier OpenAI app
 - you want to call OpenAI-compatible APIs
@@ -139,7 +143,13 @@ Store the API key in Zapier connection fields or secrets if available. Do not ha
 
 ### Expected response parsing
 
-In the OpenAI `responses` format, the structured output is typically available in the response body. In Zapier, inspect the live sample and extract the returned JSON text from the output field that contains the model result.
+Use the first field in the webhook sample that contains the model's final text payload.
+
+Recommended extraction order in Zapier:
+
+1. `output_text` if Zapier exposes it directly
+2. `output[0].content[0].text` if the response is shown as nested JSON
+3. a formatter step that isolates the JSON-looking block from the raw body if the webhook step gives you one large text field
 
 If your response comes back as text, parse it with `Formatter`.
 
@@ -192,6 +202,12 @@ https://api.openai.com/v1/responses
 ### Expected output
 
 This request can return plain text rather than strict JSON because the content is meant for direct email and Mailchimp draft creation.
+
+Recommended extraction order in Zapier:
+
+1. `output_text`
+2. `output[0].content[0].text`
+3. raw response body text split by the stable headings
 
 ## Ask Sage-Compatible Classification Request
 
@@ -295,6 +311,13 @@ If the draft output is plain text with sections, use stable headings:
 
 Then use Zapier `Text` formatter steps to split on those headings.
 
+For the first iteration, do not over-parse this output. You only need:
+
+- the first subject option
+- the first preheader option
+- the full newsletter draft block
+- the full internal review notes block
+
 ## Error Handling
 
 ### If the model returns invalid JSON
@@ -321,3 +344,4 @@ Then use Zapier `Text` formatter steps to split on those headings.
 - Keep API keys in Zapier secrets or connection settings
 - Do not email raw secrets or full request logs
 - Keep classification payloads limited to the minimum text needed
+- Use the sample files in `examples/` to validate mappings without exposing real inbox content during setup.

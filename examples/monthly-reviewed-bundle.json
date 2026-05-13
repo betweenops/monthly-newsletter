@@ -1,0 +1,53 @@
+[
+  {
+    "message_id": "18f3d7c21ab4",
+    "classification": "INCLUDE",
+    "one_sentence_summary": "River City Library is hosting a free family summer reading kickoff at the Main Branch on May 16.",
+    "reason": "This is a local, positive, family-friendly event with clear date, place, and organizer details in the source text.",
+    "missing_detail_for_human_review": "",
+    "extracted_facts": {
+      "event_name": "Summer Reading Kickoff",
+      "organization": "River City Library",
+      "date": "Saturday, May 16 from 10:00 AM to 1:00 PM",
+      "location": "Main Branch, 42 Oak Street",
+      "call_to_action": "Learn more at rivercitylibrary.org/summer"
+    },
+    "source_from": "events@rivercitylibrary.org",
+    "source_subject": "Free Summer Reading Kickoff This Saturday",
+    "source_snippet": "Join us for a free family kickoff with books, crafts, and signups for summer reading."
+  },
+  {
+    "message_id": "18f3d9023bb1",
+    "classification": "MAYBE",
+    "one_sentence_summary": "A downtown association teaser mentions a neighborhood cleanup but omits the final location and signup link.",
+    "reason": "The topic is useful and community-focused, but the source text is incomplete and needs human confirmation before inclusion.",
+    "missing_detail_for_human_review": "Missing confirmed cleanup location and official signup link.",
+    "extracted_facts": {
+      "event_name": "Neighborhood Cleanup",
+      "organization": "Downtown Association",
+      "date": "May 22",
+      "location": "",
+      "call_to_action": ""
+    },
+    "source_from": "hello@downtownassociation.org",
+    "source_subject": "Cleanup teaser for next weekend",
+    "source_snippet": "Save the date for a cleanup event next weekend."
+  },
+  {
+    "message_id": "18f3da182c42",
+    "classification": "EXCLUDE",
+    "one_sentence_summary": "A city alert discusses a road closure tied to an emergency response.",
+    "reason": "This is safety/emergency content and does not fit the newsletter tone or inclusion rules.",
+    "missing_detail_for_human_review": "",
+    "extracted_facts": {
+      "event_name": "",
+      "organization": "City Alerts",
+      "date": "",
+      "location": "",
+      "call_to_action": ""
+    },
+    "source_from": "alerts@city.gov",
+    "source_subject": "Emergency closure notice",
+    "source_snippet": "Road closure in effect until further notice."
+  }
+]

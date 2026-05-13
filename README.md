@@ -1,20 +1,21 @@
 # Monthly Newsletter Automation
 
-Zapier-based MVP for generating a monthly local community newsletter draft from Gmail using an LLM, with human approval required before anything is sent.
+Zapier-based MVP for generating a monthly local community newsletter draft from Gmail and attaching it to a CRM-defined audience, with human approval required before anything is sent.
 
 ## Overview
 
-This project is scoped as a simple automation, not a custom backend.
+This project is scoped as a simple Zapier automation, not a custom backend.
 
 The workflow:
 
 1. Runs once per month in Zapier
 2. Searches Gmail for recent local/community updates
-3. Uses an LLM to classify each candidate as `INCLUDE`, `MAYBE`, or `EXCLUDE`
-4. Generates a newsletter draft from approved items only
+3. Optionally uses an AI step in Zapier to classify each candidate as `INCLUDE`, `MAYBE`, or `EXCLUDE`
+4. Fills a newsletter draft template from approved items
 5. Creates a draft in Mailchimp or HubSpot
-6. Emails the owner a review summary
-7. Requires manual approval before send
+6. Uses the CRM-defined audience/list for recipients
+7. Emails the owner a review summary
+8. Requires manual approval before send
 
 ## Goal
 
@@ -25,8 +26,8 @@ Create a warm, practical, community-focused monthly newsletter for CRM contacts 
 - `Zapier` for scheduling and orchestration
 - `Gmail` for candidate content
 - `CRM` for audience/source-of-truth data
-- `OpenAI` or Ask Sage-compatible API using `gpt-5.4`
-- `Mailchimp` or `HubSpot` for draft creation
+- `Mailchimp` or `HubSpot` for draft creation and recipient audience
+- optional `AI by Zapier`, `OpenAI`, or similar Zapier AI step for classification/draft help
 - `Gmail` for internal review notification
 
 ## Content Rules
@@ -57,7 +58,8 @@ Exclude:
 
 - Keep this as a Zapier-first MVP
 - Prefer a curated Gmail label such as `newsletter-source`
-- Classify one email at a time for stability and auditability
+- Keep the first version buildable without direct API calls
+- Use AI inside Zapier only if the newsletter content needs help with classification or drafting
 - Generate a draft only, never auto-send
 - Keep a human review step in every run
 
@@ -65,15 +67,15 @@ Exclude:
 
 - [Implementation Spec](./IMPLEMENTATION.md) for architecture, design decisions, guardrails, data model, and operating guidance
 - [Zapier Build Sheet](./ZAPIER_BUILD_SHEET.md) for the exact Zap sequence, app steps, mappings, filters, and draft-platform setup
-- [Webhook Templates](./WEBHOOK_TEMPLATES.md) for copy/paste OpenAI and Ask Sage-compatible request payloads
+- [Webhook Templates](./WEBHOOK_TEMPLATES.md) for optional advanced webhook/API usage if Zapier app steps are not enough
 
 ## Recommended Build Order
 
 1. Create the Gmail label and trusted sender list
 2. Build the monthly Zap trigger and Gmail search
-3. Add per-email LLM classification
-4. Aggregate reviewed items
-5. Generate the final newsletter draft
+3. Pull the audience/list from the CRM or email platform
+4. Fill the draft template from the selected Gmail items
+5. Add an AI step only if needed for cleanup, classification, or writing help
 6. Create the Mailchimp or HubSpot draft
 7. Send the internal review email
 8. Run a manual dry run and tune the filters
@@ -85,8 +87,10 @@ This repo is now organized as a small handoff package:
 - `README.md` is the entry point
 - `IMPLEMENTATION.md` explains what to build and why
 - `ZAPIER_BUILD_SHEET.md` explains how to build it in Zapier
-- `WEBHOOK_TEMPLATES.md` contains the LLM request bodies
+- `WEBHOOK_TEMPLATES.md` contains optional LLM request bodies for an advanced webhook path
+- `examples/` contains sample candidate, review, and bundle payloads for dry runs
+- `templates/` contains a starter HTML template for Mailchimp campaign content
 
 ## Next Step
 
-Use [ZAPIER_BUILD_SHEET.md](./ZAPIER_BUILD_SHEET.md) to build the Zap, and use [WEBHOOK_TEMPLATES.md](./WEBHOOK_TEMPLATES.md) if you are calling the LLM through `Webhooks by Zapier`.
+Use [ZAPIER_BUILD_SHEET.md](./ZAPIER_BUILD_SHEET.md) for the default Zapier-native build. Only use [WEBHOOK_TEMPLATES.md](./WEBHOOK_TEMPLATES.md) if you decide later that Zapier's built-in app steps are too limited.
